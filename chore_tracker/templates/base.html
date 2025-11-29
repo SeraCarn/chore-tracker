@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Chore Quest - Earn Your Gaming Time!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f5ff;
+            --neon-pink: #ff0080;
+            --neon-purple: #a400ff;
+            --neon-green: #00ff40;
+            --dark-bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --glow-blue: 0 0 10px #00f5ff, 0 0 20px #00f5ff, 0 0 30px #00f5ff;
+            --glow-pink: 0 0 10px #ff0080, 0 0 20px #ff0080, 0 0 30px #ff0080;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px var(--neon-blue);
+            animation: pulse 2s infinite;
+        }
+
+        .nav-link {
+            color: #fff !important;
+            margin: 0 5px;
+            border-radius: 25px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.7s;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 245, 255, 0.2);
+            box-shadow: 0 0 15px var(--neon-blue);
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: var(--glow-blue);
+        }
+
+        .card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(164, 0, 255, 0.1));
+            z-index: -1;
+            border-radius: 15px;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), var(--glow-blue);
+        }
+
+        .points-card {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.9), rgba(164, 0, 255, 0.9));
+            border: 2px solid var(--neon-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .gaming-time-card {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.9), rgba(164, 0, 255, 0.9));
+            border: 2px solid var(--neon-pink);
+            box-shadow: var(--glow-pink);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: 2px solid var(--neon-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            box-shadow: 0 0 20px var(--neon-blue);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--neon-green), #00b894);
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+        }
+
+        .completion-btn {
+            background: linear-gradient(135deg, var(--neon-green), #00b894);
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .completion-btn:hover {
+            animation: pulse-glow 1s infinite;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--neon-pink), #e17055);
+            border: 2px solid var(--neon-pink);
+            box-shadow: var(--glow-pink);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        .badge {
+            font-size: 0.9em;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: var(--glow-blue);
+        }
+
+        .display-4 {
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .card-title, .card-subtitle {
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+        }
+
+        .alert {
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            background: rgba(26, 26, 26, 0.9);
+            box-shadow: var(--glow-blue);
+        }
+
+        .text-glow {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .text-glow-pink {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .text-glow-green {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .progress {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: progress-glow 2s ease-in-out infinite;
+        }
+
+        .chore-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chore-card:hover {
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), var(--glow-blue);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border-bottom: 2px solid var(--neon-blue);
+        }
+
+        .list-group-item {
+            background: transparent;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            margin-bottom: 8px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            background: rgba(0, 245, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(5px);
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 10px var(--neon-blue); }
+            50% { text-shadow: 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px var(--neon-green); }
+            50% { box-shadow: 0 0 25px var(--neon-green), 0 0 35px var(--neon-green); }
+        }
+
+        @keyframes progress-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .avatar-glow {
+            box-shadow: 0 0 20px var(--neon-blue);
+            border: 3px solid var(--neon-blue);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .game-controller-icon {
+            font-size: 2rem;
+            color: var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
+            animation: pulse 1.5s infinite;
+        }
+
+        .chore-icon {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .completion-modal-btn {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            transition: all 0.3s ease;
+        }
+
+        .completion-modal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--neon-green);
+        }
+    </style>
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand text-glow" href="/">
+                <i class="fas fa-dragon me-2"></i>Chore Quest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chores"><i class="fas fa-list-check me-1"></i>Quests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gaming"><i class="fas fa-gamepad text-glow-pink me-1"></i>Game Time</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin"><i class="fas fa-cog me-1"></i>Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show border-0" role="alert">
+                        <i class="fas fa-bell me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh points display
+        function refreshPoints() {
+            fetch('/api/points')
+                .then(response => response.json())
+                .then(data => {
+                    const pointsElement = document.getElementById('total-points');
+                    const minutesElement = document.getElementById('available-minutes');
+                    
+                    if (pointsElement) {
+                        // Animate the points change
+                        pointsElement.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            pointsElement.style.transform = 'scale(1)';
+                        }, 200);
+                        pointsElement.textContent = data.total_points;
+                    }
+                    
+                    if (minutesElement) {
+                        minutesElement.textContent = data.available_minutes;
+                    }
+                });
+        }
+        
+        // Refresh every 30 seconds
+        setInterval(refreshPoints, 30000);
+        
+        // Add some fun interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effects to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+            
+            // Add hover effects to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    const rect = this.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.width = ripple.style.height = '30px';
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

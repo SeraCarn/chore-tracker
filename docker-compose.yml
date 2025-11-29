@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  chore-tracker:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - chore_data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=False
+      - DATABASE_URL=sqlite:///data/chore_tracker.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  chore_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/chore_data

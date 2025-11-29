@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card points-card text-center">
+            <div class="card-body">
+                <div class="game-controller-icon mb-3">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <h3 class="card-title text-white mb-3">
+                    <i class="fas fa-star me-2"></i>Adventure Points
+                </h3>
+                <div class="stats-number floating" id="total-points">{{ total_points }}</div>
+                <p class="card-text mt-2">Keep conquering quests to earn more points!</p>
+                <div class="progress mt-3">
+                    <div class="progress-bar" style="width: {{ (total_points / 100 * 10) if total_points < 100 else 100 }}%"></div>
+                </div>
+                <small class="text-muted">Level up your gaming privileges!</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card gaming-time-card text-center">
+            <div class="card-body">
+                <div class="game-controller-icon mb-3">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="card-title text-white mb-3">
+                    <i class="fas fa-gamepad me-2"></i>Gaming Time Available
+                </h3>
+                <div class="stats-number floating" id="available-minutes">{{ available_minutes }}</div>
+                <p class="card-text mt-2">minutes to play your favorite games</p>
+                <div class="progress mt-3">
+                    <div class="progress-bar bg-success" style="width: {{ (available_minutes / 60 * 100) if available_minutes < 60 else 100 }}%"></div>
+                </div>
+                <small class="text-muted">Ready to level up?</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-history me-2 text-glow"></i>Recent Quest Completions
+                </h4>
+                <div class="badge bg-primary">{{ recent_completions|length }} completions</div>
+            </div>
+            <div class="card-body">
+                {% if recent_completions %}
+                    <div class="list-group list-group-flush">
+                        {% for completion in recent_completions %}
+                            <div class="list-group-item chore-completion-item">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="chore-icon me-3">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">{{ completion.chore.name }}</h6>
+                                            {% if completion.chore.description %}
+                                                <small class="text-muted">{{ completion.chore.description[:50] }}{% if completion.chore.description|length > 50 %}...{% endif %}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-plus me-1"></i>{{ completion.chore.points_value }} pts
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ completion.completed_at.strftime('%m/%d %H:%M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% if completion.notes %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-comment me-1"></i>{{ completion.notes }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <div class="game-controller-icon mb-3">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h5 class="text-muted">No quests completed yet</h5>
+                        <p class="text-muted">Complete some chores to start earning points!</p>
+                        <a href="/chores" class="btn btn-primary">
+                            <i class="fas fa-magic me-2"></i>View Available Quests
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-play me-2 text-glow-pink"></i>Active Gaming Session
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if active_session %}
+                    <div class="text-center">
+                        <div class="game-controller-icon mb-3">
+                            <i class="fas fa-game-console"></i>
+                        </div>
+                        <h3 class="text-glow-green mb-2">{{ active_session.duration_minutes }} minutes</h3>
+                        <p class="lead">Currently available to play</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                Started: {{ active_session.started_at.strftime('%H:%M') }}
+                            </small>
+                        </div>
+                        <form action="/end_gaming/{{ active_session.id }}" method="post">
+                            <button type="submit" class="btn btn-danger btn-lg completion-modal-btn">
+                                <i class="fas fa-stop me-2"></i>End Session
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="text-center">
+                        <div class="game-controller-icon mb-3">
+                            <i class="fas fa-controller"></i>
+                        </div>
+                        <h5 class="text-muted">No active gaming session</h5>
+                        <p class="text-muted">You have {{ available_minutes }} minutes available</p>
+                        {% if available_minutes > 0 %}
+                            <a href="/gaming" class="btn btn-success btn-lg">
+                                <i class="fas fa-play me-2"></i>Start Gaming
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                <i class="fas fa-lock me-2"></i>Earn More Points First
+                            </button>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body text-center">
+                <h6 class="card-title mb-3">
+                    <i class="fas fa-bolt me-2 text-glow"></i>Quick Actions
+                </h6>
+                <div class="d-grid gap-2">
+                    <a href="/chores" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Complete Quest
+                    </a>
+                    <a href="/gaming" class="btn btn-outline-success btn-lg">
+                        <i class="fas fa-gamepad me-2"></i>Manage Gaming
+                    </a>
+                    <a href="/admin" class="btn btn-outline-info btn-lg">
+                        <i class="fas fa-cog me-2"></i>Customize Quests
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Bonus Section -->
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-gift me-2"></i>Daily Bonus
+                </h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="game-controller-icon mb-2">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <p class="mb-2">Login daily for bonus points!</p>
+                <button class="btn btn-warning btn-sm">
+                    <i class="fas fa-gift me-1"></i> Claim 20 Points
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Achievement Badges -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2 text-glow"></i>Achievement Badges
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="avatar-glow rounded-circle p-3 d-inline-block mb-2">
+                                <i class="fas fa-bed chore-icon"></i>
+                            </div>
+                            <br>
+                            <small>Master of Making Beds</small>
+                            <div class="progress mt-1" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="avatar-glow rounded-circle p-3 d-inline-block mb-2">
+                                <i class="fas fa-dishwasher chore-icon"></i>
+                            </div>
+                            <br>
+                            <small>Dishwashing Champion</small>
+                            <div class="progress mt-1" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="avatar-glow rounded-circle p-3 d-inline-block mb-2">
+                                <i class="fas fa-broom chore-icon"></i>
+                            </div>
+                            <br>
+                            <small>Cleaning Conqueror</small>
+                            <div class="progress mt-1" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: 40%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="avatar-glow rounded-circle p-3 d-inline-block mb-2">
+                                <i class="fas fa-star chore-icon"></i>
+                            </div>
+                            <br>
+                            <small>Gaming Guardian</small>
+                            <div class="progress mt-1" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: 20%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

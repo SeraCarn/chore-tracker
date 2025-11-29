@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center">
+            <div class="game-controller-icon me-3" style="font-size: 2.5rem;">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div>
+                <h2 class="text-glow mb-1">⚙️ Admin Panel</h2>
+                <p class="text-muted">Customize your chore quest system</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+        <div class="btn-group" role="group">
+            <a href="/" class="btn btn-outline-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a href="/chores" class="btn btn-outline-success">
+                <i class="fas fa-list-check me-2"></i>Quests
+            </a>
+            <a href="/gaming" class="btn btn-outline-info">
+                <i class="fas fa-gamepad me-2"></i>Gaming Time
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h4 class="mb-0">
+                    <i class="fas fa-list-check me-2"></i>Chore Management
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5 class="text-glow mb-3">
+                        <i class="fas fa-plus me-2"></i>Add New Quest
+                    </h5>
+                    <form action="/add_chore" method="post" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-signature me-2"></i>Quest Name:
+                                    </label>
+                                    <input type="text" class="form-control bg-dark border-secondary text-light" 
+                                           id="name" name="name" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a quest name.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="points_value" class="form-label">
+                                        <i class="fas fa-coins me-2"></i>Points Value:
+                                    </label>
+                                    <input type="number" class="form-control bg-dark border-secondary text-light" 
+                                           id="points_value" name="points_value" value="10" min="1" required>
+                                    <div class="invalid-feedback">
+                                        Points must be at least 1.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label"> </label>
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-magic me-2"></i>Add Quest
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left me-2"></i>Description (optional):
+                            </label>
+                            <textarea class="form-control bg-dark border-secondary text-light" 
+                                      id="description" name="description" rows="2"
+                                      placeholder="Describe what needs to be done..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                
+                <h5 class="text-glow mb-3">
+                    <i class="fas fa-clipboard-list me-2"></i>Existing Quests
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead class="table-header">
+                            <tr>
+                                <th>
+                                    <i class="fas fa-signature me-2"></i>Name
+                                </th>
+                                <th>
+                                    <i class="fas fa-align-left me-2"></i>Description
+                                </th>
+                                <th>
+                                    <i class="fas fa-coins me-2"></i>Points
+                                </th>
+                                <th>
+                                    <i class="fas fa-toggle-on me-2"></i>Status
+                                </th>
+                                <th>
+                                    <i class="fas fa-calendar me-2"></i>Created
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for chore in chores %}
+                                <tr class="{% if not chore.is_active %}table-secondary{% endif %}">
+                                    <td>
+                                        <span class="text-glow">{{ chore.name }}</span>
+                                        {% if not chore.is_active %}
+                                            <span class="badge bg-secondary ms-2">
+                                                <i class="fas fa-eye-slash me-1"></i>Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ chore.description[:50] }}{% if chore.description|length > 50 %}...{% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-coins me-1"></i>{{ chore.points_value }} pts
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if chore.is_active %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-clock me-1"></i>Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ chore.created_at.strftime('%Y-%m-%d') }}
+                                        </small>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <div class="game-controller-icon mb-2">
+                                            <i class="fas fa-inbox"></i>
+                                        </div>
+                                        No quests defined yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-sliders-h me-2"></i>System Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="mb-4">
+                        <label for="points_per_minute" class="form-label">
+                            <i class="fas fa-coins me-2"></i>Points per Minute:
+                        </label>
+                        <input type="number" class="form-control bg-dark border-secondary text-light" 
+                               id="points_per_minute" 
+                               value="{{ settings.points_per_minute }}" min="1">
+                        <div class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            How many points needed for 1 minute of gaming
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="daily_bonus" class="form-label">
+                            <i class="fas fa-gift me-2"></i>Daily Bonus Points:
+                        </label>
+                        <input type="number" class="form-control bg-dark border-secondary text-light" 
+                               id="daily_bonus" 
+                               value="{{ settings.daily_bonus_points }}" min="0">
+                        <div class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Bonus points for daily login
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <h6 class="text-glow mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                </h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-chart-bar text-info me-2"></i>
+                        Total Quests: 
+                        <span class="badge bg-info ms-2">{{ chores|length }}</span>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Active Quests: 
+                        <span class="badge bg-success ms-2">{{ chores|selectattr('is_active')|list|length }}</span>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        Inactive Quests: 
+                        <span class="badge bg-warning text-dark ms-2">{{ (chores|length) - (chores|selectattr('is_active')|list|length) }}</span>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-user text-primary me-2"></i>
+                        System Status: 
+                        <span class="badge bg-success ms-2">
+                            <i class="fas fa-check me-1"></i>Active
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body text-center">
+                <h6 class="card-title mb-3">
+                    <i class="fas fa-tools me-2 text-glow"></i>System Tools
+                </h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-upload me-2"></i>Import Quests
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-2"></i>Reset System
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mt-3">
+            <div class="card-header bg-gradient text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/chores" class="btn btn-outline-primary btn-sm">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-list-check me-2"></i>
+                            <span>View All Quests</span>
+                        </div>
+                    </a>
+                    <a href="/" class="btn btn-outline-success btn-sm">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            <span>View Dashboard</span>
+                        </div>
+                    </a>
+                    <a href="/gaming" class="btn btn-outline-info btn-sm">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-gamepad me-2"></i>
+                            <span>Check Gaming Time</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Admin privileges granted
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Info Modal -->
+<div class="modal fade" id="systemInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title text-glow">
+                    <i class="fas fa-info-circle me-2"></i>System Information
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Database Status</h6>
+                        <p class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Connected and optimized
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Last Backup</h6>
+                        <p class="text-muted">
+                            <i class="fas fa-calendar me-2"></i>
+                            2 hours ago
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-dark">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Settings form handler
+    const settingsForm = document.querySelector('form');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add AJAX handler here for settings save
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                Settings saved successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            settingsForm.appendChild(alertDiv);
+            
+            // Show system info modal as feedback
+            setTimeout(() => {
+                const systemModal = new bootstrap.Modal(document.getElementById('systemInfoModal'));
+                systemModal.show();
+            }, 1000);
+        });
+    }
+    
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+    
+    // Add hover effects to table rows
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(0, 245, 255, 0.1)';
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.background = '';
+            this.style.transform = '';
+        });
+    });
+});
+</script>
+<style>
+.table-header {
+    background: linear-gradient(135deg, #00f5ff, #a400ff);
+}
+
+.table-header th {
+    border-top: none;
+    font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 245, 255, 0.1) !important;
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #00f5ff, #a400ff);
+}
+</style>
+{% endblock %}

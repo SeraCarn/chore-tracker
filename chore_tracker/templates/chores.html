@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-glow mb-0">
+            <i class="fas fa-dungeon me-2"></i>Available Quests
+        </h2>
+        <p class="text-muted">Complete these heroic deeds to earn adventure points!</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="/admin" class="btn btn-outline-primary">
+            <i class="fas fa-cog me-2"></i>Manage Quests
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    {% for chore in chores %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card chore-card h-100">
+                <div class="position-absolute top-0 end-0 m-3">
+                    <div class="badge bg-primary rounded-pill px-3 py-2">
+                        <i class="fas fa-coins me-1"></i>{{ chore.points_value }} pts
+                    </div>
+                </div>
+                
+                <div class="card-body text-center py-4">
+                    <div class="mb-3">
+                        {% if chore.name == 'Make Bed' %}
+                            <i class="fas fa-bed game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Do Dishes' %}
+                            <i class="fas fa-dishwasher game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Vacuum Living Room' %}
+                            <i class="fas fa-vacuum game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Take Out Trash' %}
+                            <i class="fas fa-trash-alt game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Clean Bathroom' %}
+                            <i class="fas fa-shower game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Do Laundry' %}
+                            <i class="fas fa-tshirt game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Sweep Kitchen' %}
+                            <i class="fas fa-broom game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Water Plants' %}
+                            <i class="fas fa-seedling game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Clean Room' %}
+                            <i class="fas fa-home game-controller-icon" style="font-size: 3rem;"></i>
+                        {% elif chore.name == 'Help with Dinner' %}
+                            <i class="fas fa-utensils game-controller-icon" style="font-size: 3rem;"></i>
+                        {% else %}
+                            <i class="fas fa-quest game-controller-icon" style="font-size: 3rem;"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title mb-2">{{ chore.name }}</h5>
+                    
+                    {% if chore.description %}
+                        <p class="card-text text-muted mb-4">{{ chore.description }}</p>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        </div>
+                        <small class="text-muted">Ready to conquer</small>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <button class="btn completion-btn btn-lg w-100" data-chore-id="{{ chore.id }}">
+                        <i class="fas fa-magic me-2"></i>Complete Quest
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <div class="game-controller-icon mx-auto mb-4" style="font-size: 4rem;">
+                        <i class="fas fa-scroll"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Quests Available</h4>
+                    <p class="text-muted mb-4">It seems all quests have been completed or none have been created yet.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/admin" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Create Your First Quest
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i>Return to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Completion Modal -->
+<div class="modal fade" id="completionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header points-card">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-trophy me-3"></i>Quest Completed!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="completionForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="chore_id" id="modalChoreId">
+                    
+                    <div class="text-center mb-4">
+                        <div class="game-controller-icon mb-3" style="font-size: 3rem;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4 class="text-glow">Excellent Work!</h4>
+                        <p class="text-muted">You're one step closer to gaming glory!</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="completionNotes" class="form-label">
+                            <i class="fas fa-comment me-2"></i>How did it go?
+                        </label>
+                        <textarea class="form-control bg-dark border-secondary text-light" 
+                                id="completionNotes" name="notes" rows="3" 
+                                placeholder="Tell us about your heroic deed... Any challenges overcome? 
+
+Example: 'Defeated the messy bed monster in record time!'"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-dark">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Not Now
+                    </button>
+                    <button type="submit" class="btn completion-modal-btn">
+                        <i class="fas fa-save me-2"></i>Log Achievement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quest Stats -->
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="game-controller-icon mb-2">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h6 class="card-title">Weekly Progress</h6>
+                <div class="progress mt-3">
+                    <div class="progress-bar bg-info" style="width: 65%"></div>
+                </div>
+                <small class="text-muted">3/5 quests completed this week</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="game-controller-icon mb-2">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <h6 class="card-title">Streak Counter</h6>
+                <h4 class="text-glow">3 days</h4>
+                <small class="text-muted">Keep the momentum going!</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const completionButtons = document.querySelectorAll('.completion-btn');
+    const modal = new bootstrap.Modal(document.getElementById('completionModal'));
+    const form = document.getElementById('completionForm');
+    const choreIdInput = document.getElementById('modalChoreId');
+    
+    completionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const choreId = this.dataset.choreId;
+            choreIdInput.value = choreId;
+            form.action = `/complete_chore/${choreId}`;
+            modal.show();
+        });
+    });
+    
+    // Add some fun effects
+    const cards = document.querySelectorAll('.chore-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.animation = 'pulse-glow 1s ease-in-out';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 1000);
+        });
+    });
+    
+    // Confetti effect when modal shows
+    const completionModal = document.getElementById('completionModal');
+    completionModal.addEventListener('shown.bs.modal', function() {
+        // Create a subtle confetti effect
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.innerHTML = ['🎉', '✨', '🎊', '⭐', '🎯'][i % 5];
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.fontSize = '2rem';
+                confetti.style.animation = 'fall 3s ease-out forwards';
+                confetti.style.zIndex = '9999';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }, i * 200);
+        }
+    });
+});
+</script>
+<style>
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+</style>
+{% endblock %}

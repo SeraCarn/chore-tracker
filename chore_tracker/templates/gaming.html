@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+            <div class="game-controller-icon me-3" style="font-size: 2.5rem;">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <div>
+                <h2 class="text-glow mb-1">🎮 Game Time Management</h2>
+                <p class="text-muted">Ready to level up your gaming experience?</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card bg-transparent border-0">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i class="fas fa-coins game-controller-icon"></i>
+                </div>
+                <h5 class="text-glow">{{ available_minutes * 10 }}</h5>
+                <p class="text-muted">Total Points</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-play me-2"></i>Start Gaming Session
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-info text-white text-center h-100">
+                            <div class="card-body">
+                                <div class="game-controller-icon mb-2">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <h6 class="card-title">Available Points</h6>
+                                <h3 class="mb-0">{{ available_minutes * 10 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-warning text-dark text-center h-100">
+                            <div class="card-body">
+                                <div class="game-controller-icon mb-2">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h6 class="card-title">Available Minutes</h6>
+                                <h3 class="mb-0">{{ available_minutes }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="/start_gaming" method="post">
+                    <div class="mb-4">
+                        <label for="minutes" class="form-label">
+                            <i class="fas fa-sliders-h me-2"></i>Minutes to Play:
+                        </label>
+                        <input type="range" class="form-range range-lg" id="minutesSlider" name="minutes" 
+                               min="5" max="{{ available_minutes }}" step="5" value="30">
+                        <div class="d-flex justify-content-between text-muted">
+                            <small>5 minutes</small>
+                            <small id="minutesValue">30 minutes</small>
+                            <small>{{ available_minutes }} minutes</small>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <div class="game-controller-icon mb-2">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <p class="text-muted">Cost: <span id="pointsCost">300</span> points</p>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg btn-game" id="startGamingBtn" disabled>
+                            <i class="fas fa-play me-3"></i>Start Gaming Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if active_session %}
+        <div class="card mt-4 border-0">
+            <div class="card-header bg-gradient text-white rounded">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Active Gaming Session
+                    </h5>
+                    <div class="badge bg-light text-dark">
+                        <i class="fas fa-spinner fa-spin me-1"></i>Live
+                    </div>
+                </div>
+            </div>
+            <div class="card-body text-center">
+                <div class="game-controller-icon mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-game-console"></i>
+                </div>
+                <h2 class="text-glow mb-2">{{ active_session.duration_minutes }} minutes</h2>
+                <p class="lead text-muted">Ready to play</p>
+                
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-body">
+                                <h6 class="text-muted">Session Started</h6>
+                                <p class="mb-0">{{ active_session.started_at.strftime('%H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress mb-4">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                         style="width: 100%" role="progressbar"></div>
+                </div>
+                
+                <form action="/end_gaming/{{ active_session.id }}" method="post">
+                    <button type="submit" class="btn btn-danger btn-lg completion-modal-btn">
+                        <i class="fas fa-stop me-2"></i>End Gaming Session
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2 text-glow"></i>Recent Gaming Sessions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_sessions %}
+                    {% for session in recent_sessions[:5] %}
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                            <div>
+                                <div class="game-controller-icon me-2">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <strong>{{ session.duration_minutes }} min</strong><br>
+                                <small class="text-muted">{{ session.started_at.strftime('%m/%d %H:%M') }}</small>
+                            </div>
+                            <div>
+                                {% if session.ended_at %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Done
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Active
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <div class="game-controller-icon mb-3">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <p class="text-muted">No gaming sessions yet</p>
+                        <small>Start your first session above!</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Gaming Stats -->
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Gaming Statistics
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Gaming Time</span>
+                        <span class="text-glow">{{ (recent_sessions|sum(attribute='duration_minutes')) if recent_sessions else 0 }} min</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" style="width: {{ ((recent_sessions|sum(attribute='duration_minutes')) / 300 * 100) if recent_sessions else 0 }}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sessions This Week</span>
+                        <span class="text-glow">{{ recent_sessions|length }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: {{ (recent_sessions|length / 7 * 100) if recent_sessions else 0 }}%"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-chart-line me-2"></i>View Full Stats
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Recommendations -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2 text-glow-pink"></i>Gaming Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="alert alert-info bg-dark border-info text-light">
+                        <i class="fas fa-bell me-2"></i>
+                        <strong>Pro Tip:</strong> Earn bonus points by doing multiple chores in a row!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="alert alert-warning bg-dark border-warning text-light">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Time Management:</strong> Plan your gaming sessions around your schedule.
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-magic me-2"></i>Get More Tips
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Achievement Unlocked Modal -->
+<div class="modal fade" id="achievementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 text-center">
+            <div class="modal-body py-4">
+                <div class="game-controller-icon mb-3" style="font-size: 3rem;">
+                    <i class="fas fa-trophy text-warning"></i>
+                </div>
+                <h5 class="text-glow">Achievement Unlocked!</h5>
+                <p class="text-muted mb-3">First Gaming Session</p>
+                <button class="btn btn-primary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-2"></i>Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('minutesSlider');
+    const valueDisplay = document.getElementById('minutesValue');
+    const costDisplay = document.getElementById('pointsCost');
+    const startButton = document.getElementById('startGamingBtn');
+    const maxValue = {{ available_minutes }};
+    
+    // Update display when slider changes
+    slider.addEventListener('input', function() {
+        const minutes = parseInt(this.value);
+        valueDisplay.textContent = minutes + ' minutes';
+        costDisplay.textContent = minutes * 10 + ' points';
+        startButton.disabled = minutes === 0;
+        
+        // Add visual feedback
+        valueDisplay.style.color = '#00f5ff';
+        valueDisplay.style.textShadow = '0 0 10px #00f5ff';
+        setTimeout(() => {
+            valueDisplay.style.color = '';
+            valueDisplay.style.textShadow = '';
+        }, 200);
+    });
+    
+    // Disable button if no minutes available
+    if (maxValue <= 0) {
+        startButton.disabled = true;
+        slider.disabled = true;
+        slider.value = 0;
+        valueDisplay.textContent = '0 minutes (No points available)';
+        costDisplay.textContent = '0 points';
+    }
+    
+    // Add some gaming effects
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.01)';
+            this.style.boxShadow = '0 15px 40px rgba(0, 245, 255, 0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Simulate achievement unlock for first time users
+    {% if not recent_sessions %}
+    setTimeout(() => {
+        const achievementModal = new bootstrap.Modal(document.getElementById('achievementModal'));
+        achievementModal.show();
+    }, 2000);
+    {% endif %}
+});
+</script>
+<style>
+.range-lg {
+    height: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+}
+
+.range-lg::-webkit-slider-thumb {
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00f5ff, #a400ff);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+    border: 3px solid #1a1a1a;
+}
+
+.btn-game {
+    background: linear-gradient(135deg, #00f5ff, #a400ff);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-game:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #00f5ff, #a400ff);
+}
+</style>
+{% endblock %}
